@@ -18,7 +18,7 @@ export class UserSignUpDto {
     confirmPassword!: string;
 
 
-    profilePhoto?: string;
+    profilePhoto?: Express.Multer.File | null;
     lastSeen?: Date;
     isOnline?: boolean
 

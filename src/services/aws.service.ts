@@ -2,7 +2,9 @@ import { CognitoIdentityProviderClient, ConfirmSignUpCommand, ConfirmSignUpComma
 import { AppError } from "../utils/error";
 import { ConfirmSignUpDto, SignInDto, UserSignUpDto } from "../dtos/user";
 import logger from "../utils/logger";
-
+import multer from "multer";
+import { PutObjectCommand, PutObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
+import { connect } from "mongoose";
 export class AwsService {
     public signUp = async (user: UserSignUpDto): Promise<SignUpCommandOutput> => {
         const cognitoClient = new CognitoIdentityProviderClient({
@@ -89,5 +91,32 @@ export class AwsService {
             logger.error("Error: ",err);
             throw new AppError("Problem Signing User In", 500);
         }
+    }
+
+    public uploadToS3Bucket = async(file:Express.Multer.File, key:string):Promise<PutObjectCommandOutput> => {
+        const bucketName = process.env.AWS_BUCKET_NAME;
+        const s3 = new S3Client({
+            region: process.env.AWS_REGION!,
+            credentials :{
+                accessKeyId: process.env.ACESSS_KEY_ID!,
+                secretAccessKey: process.env.SECRET_ACESS_KEY!
+            }
+        })
+        const params = {
+            Bucket: bucketName,
+            Key: key,
+            Body: file.buffer,
+            ContentType: file.mimetype
+        }
+        try{
+        const putCommand = new PutObjectCommand(params)
+        const result = await s3.send(putCommand)
+        return result;
+        }
+        catch(error){
+            logger.error("Error: ",error)
+            throw new AppError("Error while uploading file", 500);
+        }
+
     }
 }
