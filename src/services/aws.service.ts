@@ -119,4 +119,33 @@ export class AwsService {
         }
 
     }
+    public refreshUserToken = async(refreshToken:string):Promise<InitiateAuthCommandOutput> => {
+try{
+        const clientId = process.env.AWS_CLIENT_ID
+        const cognitoClient = new CognitoIdentityProviderClient({
+            region: process.env.AWS_REGION!,
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                secretAccessKey: process.env.SECRET_ACCESS_KEY!
+            }
+        })
+        const command = new InitiateAuthCommand({
+            AuthFlow: "REFRESH_TOKEN_AUTH",
+            AuthParameters: {
+                REFRESH_TOKEN: refreshToken,
+            },
+            ClientId: clientId
+        })
+        const newToken = await cognitoClient.send(command);
+        if(!newToken){
+            throw new AppError("Error Refreshing User Token", 500);
+        }
+        return newToken;
+    }
+    catch(err){
+        logger.error("ERROR refreshing user token :",err)
+        throw new AppError("Internal Server Error", 500);
+    }
+
+    }
 }

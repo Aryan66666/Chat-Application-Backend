@@ -5,6 +5,7 @@ import { plainToInstance } from "class-transformer";
 import { ConfirmSignUpDto, SignInDto, UserSignUpDto } from "../dtos/user";
 import validateDto from "../utils/validate";
 import sendResponse from "../utils/response";
+import { AppError } from "../utils/error";
 
 export class UserController {
     constructor(private readonly authService:AuthService, 
@@ -33,6 +34,15 @@ export class UserController {
         const result = this.awsService.signIn(model);
         return sendResponse(res, 200, result, "User Signed In Successfully")
 
+    }
+
+    refreshToken = async(req:Request, res:Response): Promise<Response> => {
+        const refreshToken = req.body
+        if(!refreshToken){
+            throw new AppError("Refresh Token is required", 400);
+        }
+        const result = this.awsService.refreshUserToken(refreshToken);
+        return sendResponse(res,200,result,"Token Refreshed Successfully");
     }
 
 }

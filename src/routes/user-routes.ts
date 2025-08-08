@@ -14,4 +14,5 @@ const router = Router();
 router
     .post('/sign-up', upload.single('profilePhoto') ,wrap(controller.signUp))
     .post('/confirm-sign-up',wrap(controller.confirmSignUp))
-    .post('/sign-in',wrap(controller.signIn));
+    .post('/sign-in',wrap(controller.signIn))
+    .post('/refresh-token',wrap(controller.refreshToken));
